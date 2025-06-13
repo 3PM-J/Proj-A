@@ -1,47 +1,100 @@
 package upeu.edu.pe.registroa.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 
+
 @Entity
-@Table(name = "pacientes")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "paciente")
 public class Paciente {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, length = 100)
+
     private String nombres;
-    
-    @Column(nullable = false, length = 100)
     private String apellidos;
-    
-    @Column(nullable = false, unique = true, length = 20)
     private String dni;
-    
-    @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
-    
-    @Column(length = 20)
     private String telefono;
-    
-    @Column(length = 100)
     private String email;
-    
-    @Column(length = 200)
     private String direccion;
-    
-    @Column(length = 50)
     private String genero;
-    
+
+    // Getters
+    public String getNombres() {
+        return nombres;
+    }
+
+    public String getApellidos() {
+        return apellidos;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    // Setters
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getNombreCompleto() {
         return nombres + " " + apellidos;
     }

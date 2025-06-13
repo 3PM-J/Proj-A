@@ -1,17 +1,12 @@
 package upeu.edu.pe.registroa;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+public class JavaFXApplication{
 
-public class JavaFXApplication extends Application {
+    public static void main(String[] args) {
+        RegistroAApplication.main(args);
+    }
 
-    private ConfigurableApplicationContext springContext;
+    /*private ConfigurableApplicationContext springContext;
 
     @Override
     public void init() {
@@ -22,10 +17,10 @@ public class JavaFXApplication extends Application {
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/paciente.fxml"));
         fxmlLoader.setControllerFactory(springContext::getBean);
-        
+
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root, 1000, 700);
-        
+
         primaryStage.setTitle("Sistema de Registro de Pacientes");
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
@@ -40,5 +35,5 @@ public class JavaFXApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
-    }
+    }*/
 }
