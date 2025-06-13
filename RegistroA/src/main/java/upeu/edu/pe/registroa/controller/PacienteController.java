@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import upeu.edu.pe.registroa.model.Paciente;
 import upeu.edu.pe.registroa.service.PacienteService;
+import upeu.edu.pe.registroa.util.ValidationUtils;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ public class PacienteController implements Initializable {
     @FXML private TextField txtEmail;
     @FXML private TextField txtDireccion;
     @FXML private ComboBox<String> cbGenero;
+    @FXML private TextField txtBuscar;
     
     @FXML private TableView<Paciente> tablePacientes;
     @FXML private TableColumn<Paciente, Long> colId;
@@ -36,16 +38,19 @@ public class PacienteController implements Initializable {
     @FXML private TableColumn<Paciente, LocalDate> colFechaNacimiento;
     @FXML private TableColumn<Paciente, String> colTelefono;
     @FXML private TableColumn<Paciente, String> colEmail;
+    @FXML private TableColumn<Paciente, String> colGenero;
     
     @FXML private Button btnGuardar;
     @FXML private Button btnActualizar;
     @FXML private Button btnEliminar;
     @FXML private Button btnLimpiar;
+    @FXML private Button btnBuscar;
 
     @Autowired
     private PacienteService pacienteService;
 
     private ObservableList<Paciente> pacientesList = FXCollections.observableArrayList();
+    private ObservableList<Paciente> filteredList = FXCollections.observableArrayList();
     private Paciente pacienteSeleccionado;
 
     @Override
@@ -53,6 +58,7 @@ public class PacienteController implements Initializable {
         initializeTable();
         initializeComboBox();
         loadPacientes();
+        setupSearchFunctionality();
         
         // Listener para selección en la tabla
         tablePacientes.getSelectionModel().selectedItemProperty().addListener(
@@ -76,17 +82,56 @@ public class PacienteController implements Initializable {
         colFechaNacimiento.setCellValueFactory(new PropertyValueFactory<>("fechaNacimiento"));
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+        colGenero.setCellValueFactory(new PropertyValueFactory<>("genero"));
         
-        tablePacientes.setItems(pacientesList);
+        tablePacientes.setItems(filteredList);
+        
+        // Configurar el comportamiento de selección
+        tablePacientes.setRowFactory(tv -> {
+            TableRow<Paciente> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    Paciente rowData = row.getItem();
+                    pacienteSeleccionado = rowData;
+                    fillForm(rowData);
+                }
+            });
+            return row;
+        });
     }
 
     private void initializeComboBox() {
         cbGenero.setItems(FXCollections.observableArrayList("Masculino", "Femenino", "Otro"));
     }
 
+    private void setupSearchFunctionality() {
+        txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
+            filterPacientes(newValue);
+        });
+    }
+
+    private void filterPacientes(String searchText) {
+        filteredList.clear();
+        if (searchText == null || searchText.isEmpty()) {
+            filteredList.addAll(pacientesList);
+        } else {
+            String lowerCaseFilter = searchText.toLowerCase();
+            for (Paciente paciente : pacientesList) {
+                if (paciente.getNombres().toLowerCase().contains(lowerCaseFilter) ||
+                    paciente.getApellidos().toLowerCase().contains(lowerCaseFilter) ||
+                    paciente.getDni().contains(searchText) ||
+                    (paciente.getEmail() != null && paciente.getEmail().toLowerCase().contains(lowerCaseFilter))) {
+                    filteredList.add(paciente);
+                }
+            }
+        }
+    }
+
     private void loadPacientes() {
         pacientesList.clear();
         pacientesList.addAll(pacienteService.findAll());
+        filteredList.clear();
+        filteredList.addAll(pacientesList);
     }
 
     private void fillForm(Paciente paciente) {
@@ -163,7 +208,8 @@ public class PacienteController implements Initializable {
             Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Confirmar eliminación");
             confirmAlert.setHeaderText("¿Está seguro de eliminar este paciente?");
-            confirmAlert.setContentText("Esta acción no se puede deshacer.");
+            confirmAlert.setContentText("Esta acción no se puede deshacer.\n\nPaciente: " + 
+                pacienteSeleccionado.getNombreCompleto());
 
             Optional<ButtonType> result = confirmAlert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -184,6 +230,16 @@ public class PacienteController implements Initializable {
         clearForm();
     }
 
+    @FXML
+    private void handleBuscar() {
+        String searchText = txtBuscar.getText();
+        if (searchText != null && !searchText.trim().isEmpty()) {
+            filterPacientes(searchText);
+        } else {
+            loadPacientes();
+        }
+    }
+
     private void clearForm() {
         txtNombres.clear();
         txtApellidos.clear();
@@ -193,6 +249,7 @@ public class PacienteController implements Initializable {
         txtEmail.clear();
         txtDireccion.clear();
         cbGenero.setValue(null);
+        txtBuscar.clear();
         
         pacienteSeleccionado = null;
         tablePacientes.getSelectionModel().clearSelection();
@@ -200,30 +257,65 @@ public class PacienteController implements Initializable {
         btnGuardar.setDisable(false);
         btnActualizar.setDisable(true);
         btnEliminar.setDisable(true);
+        
+        // Restaurar la lista completa
+        filteredList.clear();
+        filteredList.addAll(pacientesList);
     }
 
     private boolean validateForm() {
-        if (txtNombres.getText().trim().isEmpty()) {
-            showAlert("Error de validación", "El campo Nombres es obligatorio", Alert.AlertType.WARNING);
+        // Validar nombres
+        if (!ValidationUtils.isValidName(txtNombres.getText())) {
+            showAlert("Error de validación", "El campo Nombres debe tener al menos 2 caracteres", Alert.AlertType.WARNING);
             txtNombres.requestFocus();
             return false;
         }
         
-        if (txtApellidos.getText().trim().isEmpty()) {
-            showAlert("Error de validación", "El campo Apellidos es obligatorio", Alert.AlertType.WARNING);
+        // Validar apellidos
+        if (!ValidationUtils.isValidName(txtApellidos.getText())) {
+            showAlert("Error de validación", "El campo Apellidos debe tener al menos 2 caracteres", Alert.AlertType.WARNING);
             txtApellidos.requestFocus();
             return false;
         }
         
-        if (txtDni.getText().trim().isEmpty()) {
-            showAlert("Error de validación", "El campo DNI es obligatorio", Alert.AlertType.WARNING);
+        // Validar DNI
+        if (!ValidationUtils.isValidDni(txtDni.getText())) {
+            showAlert("Error de validación", "El DNI debe tener exactamente 8 dígitos", Alert.AlertType.WARNING);
             txtDni.requestFocus();
             return false;
         }
         
-        if (txtDni.getText().trim().length() != 8) {
-            showAlert("Error de validación", "El DNI debe tener 8 dígitos", Alert.AlertType.WARNING);
-            txtDni.requestFocus();
+        // Validar fecha de nacimiento
+        if (dpFechaNacimiento.getValue() == null) {
+            showAlert("Error de validación", "La fecha de nacimiento es obligatoria", Alert.AlertType.WARNING);
+            dpFechaNacimiento.requestFocus();
+            return false;
+        }
+        
+        if (dpFechaNacimiento.getValue().isAfter(LocalDate.now())) {
+            showAlert("Error de validación", "La fecha de nacimiento no puede ser futura", Alert.AlertType.WARNING);
+            dpFechaNacimiento.requestFocus();
+            return false;
+        }
+        
+        // Validar teléfono (opcional pero si se ingresa debe ser válido)
+        if (!txtTelefono.getText().trim().isEmpty() && !ValidationUtils.isValidPhone(txtTelefono.getText().trim())) {
+            showAlert("Error de validación", "El teléfono debe tener 9 dígitos", Alert.AlertType.WARNING);
+            txtTelefono.requestFocus();
+            return false;
+        }
+        
+        // Validar email (opcional pero si se ingresa debe ser válido)
+        if (!txtEmail.getText().trim().isEmpty() && !ValidationUtils.isValidEmail(txtEmail.getText().trim())) {
+            showAlert("Error de validación", "El formato del email no es válido", Alert.AlertType.WARNING);
+            txtEmail.requestFocus();
+            return false;
+        }
+        
+        // Validar género
+        if (cbGenero.getValue() == null) {
+            showAlert("Error de validación", "Debe seleccionar un género", Alert.AlertType.WARNING);
+            cbGenero.requestFocus();
             return false;
         }
         
