@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pacientes - SysHost</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input {
+                min-width: auto;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <h1>👥 Gestión de Pacientes</h1>
+</header>
+
+<div class="container">
+    <a href="/" class="back-link">← Volver al inicio</a>
+
+    <div class="controls">
+        <input type="text" class="search-input" placeholder="Buscar pacientes por nombre..." id="searchInput">
+        <button class="btn btn-primary" onclick="buscarPacientes()">🔍 Buscar</button>
+        <a href="/static/Index.html" class="btn btn-success">➕ Nuevo Paciente</a>
+        <button class="btn btn-primary" onclick="cargarTodos()">📋 Mostrar Todos</button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>DNI</th>
+                <th>Edad</th>
+                <th>Sexo</th>
+                <th>Teléfono</th>
+                <th>Caso</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="pacientesTable">
+            <tr th:each="paciente : ${pacientes}">
+                <td th:text="${paciente.id}"></td>
+                <td th:text="${paciente.nombre}"></td>
+                <td th:text="${paciente.dni}"></td>
+                <td th:text="${paciente.edad}"></td>
+                <td th:text="${paciente.sexo}"></td>
+                <td th:text="${paciente.telefono}"></td>
+                <td th:text="${paciente.caso}"></td>
+                <td>
+                            <span th:class="${paciente.activo} ? 'badge badge-success' : 'badge badge-danger'"
+                                  th:text="${paciente.activo} ? 'Activo' : 'Inactivo'"></span>
+                </td>
+                <td class="actions">
+                    <button class="btn btn-primary" th:onclick="'verDetalle(' + ${paciente.id} + ')'">👁️</button>
+                    <button class="btn btn-danger" th:onclick="'eliminarPaciente(' + ${paciente.id} + ')'">🗑️</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function buscarPacientes() {
+        const nombre = document.getElementById('searchInput').value;
+        if (!nombre.trim()) {
+            alert('Por favor ingrese un nombre para buscar');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/pacientes/buscar?nombre=${encodeURIComponent(nombre)}`);
+            const result = await response.json();
+
+            if (result.success) {
+                actualizarTabla(result.data);
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al buscar pacientes');
+        }
+    }
+
+    async function cargarTodos() {
+        try {
+            const response = await fetch('/api/pacientes');
+            const result = await response.json();
+
+            if (result.success) {
+                actualizarTabla(result.data);
+                document.getElementById('searchInput').value = '';
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al cargar pacientes');
+        }
+    }
+
+    function actualizarTabla(pacientes) {
+        const tbody = document.getElementById('pacientesTable');
+        tbody.innerHTML = '';
+
+        pacientes.forEach(paciente => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${paciente.id}</td>
+                <td>${paciente.nombre}</td>
+                <td>${paciente.dni}</td>
+                <td>${paciente.edad}</td>
+                <td>${paciente.sexo || ''}</td>
+                <td>${paciente.telefono || ''}</td>
+                <td>${paciente.caso || ''}</td>
+                <td>
+                    <span class="badge ${paciente.activo ? 'badge-success' : 'badge-danger'}">
+                        ${paciente.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                </td>
+                <td class="actions">
+                    <button class="btn btn-primary" onclick="verDetalle(${paciente.id})">👁️</button>
+                    <button class="btn btn-danger" onclick="eliminarPaciente(${paciente.id})">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function verDetalle(id) {
+        try {
+            const response = await fetch(`/api/pacientes/${id}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const paciente = result.data;
+                alert(`Detalles del Paciente:
+
+Nombre: ${paciente.nombre}
+DNI: ${paciente.dni}
+Edad: ${paciente.edad}
+Sexo: ${paciente.sexo || 'No especificado'}
+Teléfono: ${paciente.telefono || 'No especificado'}
+Dirección: ${paciente.direccion || 'No especificada'}
+Correo: ${paciente.correo || 'No especificado'}
+Estatura: ${paciente.estatura || 'No especificada'}
+Peso: ${paciente.peso || 'No especificado'}
+Tipo de Sangre: ${paciente.tipoSangre || 'No especificado'}
+Caso: ${paciente.caso || 'No especificado'}
+Enfermedad Genética: ${paciente.enfermedadGenetica || 'Ninguna'}
+Estado: ${paciente.activo ? 'Activo' : 'Inactivo'}`);
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al obtener detalles del paciente');
+        }
+    }
+
+    async function eliminarPaciente(id) {
+        if (!confirm('¿Está seguro de que desea eliminar este paciente?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/pacientes/${id}`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Paciente eliminado exitosamente');
+                cargarTodos();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al eliminar paciente');
+        }
+    }
+
+    // Buscar al presionar Enter
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            buscarPacientes();
+        }
+    });
+</script>
+</body>
+</html>

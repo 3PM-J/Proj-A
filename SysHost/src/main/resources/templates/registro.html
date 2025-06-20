@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Registro de Pacientes - SysHost</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .required {
+            color: var(--accent-color);
+        }
+
+        .button {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .search-section {
+            margin: 2rem 0;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-buttons {
+            margin-top: 2rem;
+            text-align: center;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+        }
+
+        .btn-danger {
+            background: var(--accent-color);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <h1>🏥 SysHost</h1>
+    <p>Formulario de Registro de Pacientes</p>
+</header>
+
+<div class="container">
+    <a href="/" class="back-link">← Volver al inicio</a>
+
+    <div class="card">
+        <h2 style="margin-bottom: 2rem; color: var(--primary-color);">📋 Información del Paciente</h2>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="nombre">Nombre <span class="required">*</span></label>
+                <input id="nombre" type="text" required>
+            </div>
+            <div class="form-group">
+                <label for="dni">DNI <span class="required">*</span></label>
+                <input id="dni" type="text" pattern="[0-9]{8}" maxlength="8" required>
+            </div>
+            <div class="form-group">
+                <label for="fechaNacimiento">Fecha de nacimiento <span class="required">*</span></label>
+                <input id="fechaNacimiento" type="date" required>
+            </div>
+            <div class="form-group">
+                <label for="telefono">N° Teléfono</label>
+                <input id="telefono" type="text" pattern="[0-9]{9}" maxlength="9">
+            </div>
+            <div class="form-group">
+                <label for="direccion">Dirección</label>
+                <input id="direccion" type="text" maxlength="200">
+            </div>
+            <div class="form-group">
+                <label for="sexo">Sexo/Género</label>
+                <select id="sexo">
+                    <option value="">Seleccionar...</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="correo">Correo</label>
+                <input id="correo" type="email" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label for="caso">Caso</label>
+                <input id="caso" type="text" maxlength="500">
+            </div>
+            <div class="form-group">
+                <label for="estatura">Estatura (m)</label>
+                <input id="estatura" type="number" step="0.01" min="0" max="3">
+            </div>
+            <div class="form-group">
+                <label for="peso">Peso (kg)</label>
+                <input id="peso" type="number" step="0.1" min="0" max="500">
+            </div>
+            <div class="form-group">
+                <label for="tipoSangre">Tipo de Sangre</label>
+                <select id="tipoSangre">
+                    <option value="">Seleccionar...</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="enfermedadGenetica">Enfermedad Genética</label>
+                <input id="enfermedadGenetica" type="text" maxlength="300">
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="button" onclick="handleGuardar()">💾 Guardar Paciente</button>
+        </div>
+    </div>
+
+    <div class="card search-section">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">🔍 Buscar Pacientes</h3>
+        <div class="search-bar">
+            <input type="text" id="buscar" placeholder="Buscar paciente por nombre...">
+            <button class="btn-secondary" onclick="buscarPacientes()">Buscar</button>
+            <button class="btn-secondary" onclick="cargarPacientes()">Mostrar Todos</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>DNI</th>
+                <th>Edad</th>
+                <th>Caso</th>
+                <th>Estado</th>
+            </tr>
+            </thead>
+            <tbody id="tablaPacientes">
+            <!-- Datos dinámicos aquí -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="action-buttons">
+        <button class="button btn-warning" onclick="limpiarFormulario()">🧹 Limpiar Formulario</button>
+        <a href="/pacientes" class="button btn-secondary">👥 Ver Gestión Completa</a>
+    </div>
+</div>
+
+<script>
+    let pacienteEditando = null;
+
+    // Calcular edad automáticamente
+    document.getElementById('fechaNacimiento').addEventListener('change', function() {
+        const fechaNac = new Date(this.value);
+        const hoy = new Date();
+        const edad = hoy.getFullYear() - fechaNac.getFullYear();
+        console.log('Edad calculada:', edad);
+    });
+
+    async function handleGuardar() {
+        // Validaciones básicas
+        const nombre = document.getElementById("nombre").value.trim();
+        const dni = document.getElementById("dni").value.trim();
+        const fechaNacimiento = document.getElementById("fechaNacimiento").value;
+
+        if (!nombre || !dni || !fechaNacimiento) {
+            mostrarAlerta("Por favor complete los campos obligatorios (Nombre, DNI, Fecha de nacimiento)", "error");
+            return;
+        }
+
+        if (!/^\d{8}$/.test(dni)) {
+            mostrarAlerta("El DNI debe tener exactamente 8 dígitos", "error");
+            return;
+        }
+
+        const telefono = document.getElementById("telefono").value.trim();
+        if (telefono && !/^\d{9}$/.test(telefono)) {
+            mostrarAlerta("El teléfono debe tener exactamente 9 dígitos", "error");
+            return;
+        }
+
+        const paciente = {
+            nombre: nombre,
+            dni: dni,
+            fechaNacimiento: fechaNacimiento,
+            telefono: telefono || null,
+            direccion: document.getElementById("direccion").value.trim() || null,
+            sexo: document.getElementById("sexo").value || null,
+            correo: document.getElementById("correo").value.trim() || null,
+            caso: document.getElementById("caso").value.trim() || null,
+            estatura: parseFloat(document.getElementById("estatura").value) || null,
+            peso: parseFloat(document.getElementById("peso").value) || null,
+            tipoSangre: document.getElementById("tipoSangre").value || null,
+            enfermedadGenetica: document.getElementById("enfermedadGenetica").value.trim() || null
+        };
+
+        try {
+            const url = pacienteEditando ? `/api/pacientes/${pacienteEditando}` : "/api/pacientes";
+            const method = pacienteEditando ? "PUT" : "POST";
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(paciente)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                mostrarAlerta(pacienteEditando ? "Paciente actualizado exitosamente" : "Paciente registrado exitosamente", "success");
+                limpiarFormulario();
+                cargarPacientes();
+                pacienteEditando = null;
+            } else {
+                mostrarAlerta("Error: " + result.message, "error");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            mostrarAlerta("Error de conexión. Verifique su conexión a internet.", "error");
+        }
+    }
+
+    async function buscarPacientes() {
+        const nombre = document.getElementById("buscar").value.trim();
+        if (!nombre) {
+            mostrarAlerta("Por favor ingrese un nombre para buscar", "error");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/pacientes/buscar?nombre=${encodeURIComponent(nombre)}`);
+            const result = await response.json();
+
+            if (result.success) {
+                actualizarTabla(result.data);
+                if (result.data.length === 0) {
+                    mostrarAlerta("No se encontraron pacientes con ese nombre", "error");
+                }
+            } else {
+                mostrarAlerta("Error: " + result.message, "error");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            mostrarAlerta("Error al buscar pacientes", "error");
+        }
+    }
+
+    async function cargarPacientes() {
+        try {
+            const response = await fetch("/api/pacientes");
+            const result = await response.json();
+
+            if (result.success) {
+                actualizarTabla(result.data);
+                document.getElementById("buscar").value = "";
+            } else {
+                mostrarAlerta("Error: " + result.message, "error");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            mostrarAlerta("Error al cargar pacientes", "error");
+        }
+    }
+
+    function actualizarTabla(pacientes) {
+        const tablaPacientes = document.getElementById("tablaPacientes");
+        tablaPacientes.innerHTML = "";
+
+        pacientes.forEach(paciente => {
+            const fila = document.createElement("tr");
+            fila.innerHTML = `
+                <td>${paciente.id}</td>
+                <td>${paciente.nombre}</td>
+                <td>${paciente.dni}</td>
+                <td>${paciente.edad || 'N/A'}</td>
+                <td>${paciente.caso || 'Sin especificar'}</td>
+                <td>
+                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;
+                                 background: ${paciente.activo ? '#d4edda' : '#f8d7da'};
+                                 color: ${paciente.activo ? '#155724' : '#721c24'};">
+                        ${paciente.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                </td>
+            `;
+            fila.style.cursor = 'pointer';
+            fila.onclick = () => editarPaciente(paciente);
+            tablaPacientes.appendChild(fila);
+        });
+    }
+
+    function editarPaciente(paciente) {
+        pacienteEditando = paciente.id;
+
+        document.getElementById("nombre").value = paciente.nombre || '';
+        document.getElementById("dni").value = paciente.dni || '';
+        document.getElementById("fechaNacimiento").value = paciente.fechaNacimiento || '';
+        document.getElementById("telefono").value = paciente.telefono || '';
+        document.getElementById("direccion").value = paciente.direccion || '';
+        document.getElementById("sexo").value = paciente.sexo || '';
+        document.getElementById("correo").value = paciente.correo || '';
+        document.getElementById("caso").value = paciente.caso || '';
+        document.getElementById("estatura").value = paciente.estatura || '';
+        document.getElementById("peso").value = paciente.peso || '';
+        document.getElementById("tipoSangre").value = paciente.tipoSangre || '';
+        document.getElementById("enfermedadGenetica").value = paciente.enfermedadGenetica || '';
+
+        mostrarAlerta("Paciente cargado para edición. Modifique los campos y guarde.", "success");
+
+        // Scroll al formulario
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function limpiarFormulario() {
+        document.getElementById("nombre").value = '';
+        document.getElementById("dni").value = '';
+        document.getElementById("fechaNacimiento").value = '';
+        document.getElementById("telefono").value = '';
+        document.getElementById("direccion").value = '';
+        document.getElementById("sexo").value = '';
+        document.getElementById("correo").value = '';
+        document.getElementById("caso").value = '';
+        document.getElementById("estatura").value = '';
+        document.getElementById("peso").value = '';
+        document.getElementById("tipoSangre").value = '';
+        document.getElementById("enfermedadGenetica").value = '';
+        pacienteEditando = null;
+    }
+
+    function mostrarAlerta(mensaje, tipo) {
+        // Remover alertas existentes
+        const alertasExistentes = document.querySelectorAll('.alert');
+        alertasExistentes.forEach(alerta => alerta.remove());
+
+        const alerta = document.createElement('div');
+        alerta.className = `alert alert-${tipo === 'success' ? 'success' : 'error'}`;
+        alerta.textContent = mensaje;
+
+        const container = document.querySelector('.container');
+        container.insertBefore(alerta, container.children[1]);
+
+        // Remover la alerta después de 5 segundos
+        setTimeout(() => {
+            alerta.remove();
+        }, 5000);
+    }
+
+    // Buscar al presionar Enter
+    document.getElementById('buscar').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            buscarPacientes();
+        }
+    });
+
+    // Cargar pacientes al cargar la página
+    document.addEventListener("DOMContentLoaded", cargarPacientes);
+</script>
+</body>
+</html>
